@@ -1,101 +1,64 @@
 @import 'tailwindcss';
 
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600;700&family=Jost:wght@300;400;500;600;700&display=swap');
+
 @theme {
-  --color-gold: #A2834E;
-  --color-gold-light: #C4A97D;
-  --color-gold-dark: #8B7040;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-display: 'QuickExpress', 'Cinzel', 'Times New Roman', serif;
+  --color-gold: #A16207;
+  --color-gold-light: #CA8A04;
+  --color-gold-dark: #8B5E06;
+  --color-surface: #FAFAF9;
+  --color-surface-dim: #F5F5F4;
+  --color-ink: #1C1917;
+  --color-ink-light: #44403C;
+  --color-muted: #D6D3D1;
+  --font-sans: 'Jost', system-ui, -apple-system, sans-serif;
+  --font-display: 'QuickExpress', 'Bodoni Moda', 'Times New Roman', serif;
+  --font-heading: 'Bodoni Moda', 'Times New Roman', serif;
 }
 
 @layer base {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  body { font-family: var(--font-sans); color: #1a1a1a; background: #ffffff; line-height: 1.6; overflow-x: hidden; }
+  body { font-family: var(--font-sans); color: var(--color-ink); background: var(--color-surface); line-height: 1.7; overflow-x: hidden; }
   ::selection { background: var(--color-gold); color: white; }
 }
 
 /* ═══════════════════════════════════════════
-   DYNAMIC BACKGROUNDS
+   LIQUID GLASS EFFECTS
    ═══════════════════════════════════════════ */
 
-/* ── Gold mesh gradient background ── */
-.bg-mesh {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(162,131,78,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(162,131,78,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(196,169,125,0.05) 0%, transparent 50%);
+/* ── Glass card ── */
+.glass {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
-/* ── Animated wave overlay ── */
-.bg-waves {
-  position: relative;
-}
-.bg-waves::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23A2834E' fill-opacity='0.03' d='M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,218.7C960,224,1056,192,1152,165.3C1248,139,1344,117,1392,106.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23A2834E' fill-opacity='0.02' d='M0,224L48,213.3C96,203,192,181,288,186.7C384,192,480,224,576,234.7C672,245,768,235,864,213.3C960,192,1056,160,1152,165.3C1248,171,1344,213,1392,234.7L1440,256L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E") no-repeat top;
-  background-size: 100% 120px, 100% 100px;
-  pointer-events: none;
-  z-index: 0;
+.glass-dark {
+  background: rgba(28,25,23,0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(161,98,7,0.15);
 }
 
-/* ── Floating gold orbs ── */
+/* ── Floating orbs ── */
 @keyframes floatOrb {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(30px, -40px) scale(1.1); }
+  25% { transform: translate(30px, -40px) scale(1.08); }
   50% { transform: translate(-20px, -80px) scale(0.95); }
-  75% { transform: translate(40px, -30px) scale(1.05); }
+  75% { transform: translate(40px, -30px) scale(1.04); }
 }
 
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
+  filter: blur(80px);
   pointer-events: none;
   z-index: 0;
 }
 
-.orb-1 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(162,131,78,0.08), transparent 70%);
-  top: 10%; right: -5%;
-  animation: floatOrb 20s ease-in-out infinite;
-}
-
-.orb-2 {
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(196,169,125,0.06), transparent 70%);
-  top: 40%; left: -3%;
-  animation: floatOrb 25s ease-in-out infinite reverse;
-}
-
-.orb-3 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(162,131,78,0.04), transparent 70%);
-  bottom: 10%; right: 10%;
-  animation: floatOrb 30s ease-in-out infinite;
-}
-
-.orb-4 {
-  width: 250px; height: 250px;
-  background: radial-gradient(circle, rgba(139,112,64,0.05), transparent 70%);
-  top: 60%; left: 20%;
-  animation: floatOrb 22s ease-in-out infinite reverse;
-}
-
-/* ── Subtle grid pattern ── */
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(162,131,78,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(162,131,78,0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
-/* ── Gold shimmer line ── */
+/* ── Gold gradient line with shimmer ── */
 @keyframes goldShimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -103,33 +66,41 @@
 
 .gold-line {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #A2834E, transparent);
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
   background-size: 200% 100%;
   animation: goldShimmer 4s ease-in-out infinite;
-}
-
-/* ── Animated underline for headings ── */
-@keyframes expandLine {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
 }
 
 /* ── Image hover zoom ── */
 .img-zoom { overflow: hidden; }
 .img-zoom img { transition: transform 0.8s cubic-bezier(0.16,1,0.3,1); }
-.img-zoom:hover img { transform: scale(1.08); }
+.img-zoom:hover img { transform: scale(1.06); }
 
 /* ── Card hover lift ── */
 .card-lift {
   transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease;
 }
 .card-lift:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 60px rgba(162,131,78,0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 24px 80px rgba(161,98,7,0.1);
 }
 
 /* ── Smooth section transitions ── */
 .section-fade {
-  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+/* ── Dot grid pattern ── */
+.dot-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(161,98,7,0.08) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* ── Line grid pattern ── */
+.line-grid {
+  background-image:
+    linear-gradient(rgba(161,98,7,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(161,98,7,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
