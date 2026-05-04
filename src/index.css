@@ -1,3 +1,35 @@
-@import './fonts.css';
-@import './tailwind.css';
-@import './theme.css';
+@import 'tailwindcss';
+
+@theme {
+  --color-gold: #A2834E;
+  --color-gold-light: #C4A97D;
+  --color-gold-dark: #8B7040;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: #1a1a1a;
+    background: #ffffff;
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background: var(--color-gold);
+    color: white;
+  }
+}

@@ -1,212 +1,128 @@
-import { HeroVideo } from "../components/HeroVideo";
-import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router";
-import { ProjectsCarousel } from "../components/ProjectsCarousel";
-import { LanguageSelector } from "../components/LanguageSelector";
-import { useLanguage } from "../contexts/LanguageContext";
-import { translations } from "../translations/translations";
-import { Menu, X } from "lucide-react";
-import { SectionSidebar } from "../components/SectionSidebar";
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Link } from 'react-router'
+import { Menu, X } from 'lucide-react'
+import { useLang } from '../contexts/LanguageContext'
+import { translations } from '../translations/translations'
+import { LanguageSelector } from '../components/LanguageSelector'
+import { HeroVideo } from '../components/HeroVideo'
+import { SectionSidebar } from '../components/SectionSidebar'
 
-const SECTION_ORDER = ["home", "about-us", "what-makes-different", "skills-services", "projects", "references", "contact"];
+const SECTIONS = ['home', 'about', 'different', 'services', 'projects', 'references', 'contact'] as const
+type Section = typeof SECTIONS[number]
 
 export default function Home() {
-  const { language } = useLanguage();
-  const t = translations[language];
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState<{ [key: string]: number }>({});
+  const { lang } = useLang()
+  const t = translations[lang]
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [progress, setProgress] = useState<Record<string, number>>({})
+  const containerRef = useRef<HTMLDivElement>(null)
+  const animating = useRef(false)
+  const progressRef = useRef<Record<string, number>>({})
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scrollProgressRef = useRef<{ [key: string]: number }>({});
-  const isAnimatingRef = useRef(false);
-  const observerRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+  const getActiveSection = useCallback((): Section => {
+    let active: Section = 'home'
+    let max = 0
+    for (const [id, p] of Object.entries(progressRef.current)) {
+      if (p > max && p > 0.5) { max = p; active = id as Section }
+    }
+    return active
+  }, [])
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const el = containerRef.current
+    if (!el) return
 
-    const handleScroll = () => {
-      const containerHeight = container.clientHeight;
-      if (container.scrollTop > 50) setHasScrolled(true);
-
-      const updated: { [key: string]: number } = { ...scrollProgressRef.current };
-      Object.entries(observerRefs.current).forEach(([id, element]) => {
-        if (!element) return;
-        const { top, bottom } = element.getBoundingClientRect();
-        let p = 0;
-        if (top <= 0 && bottom >= containerHeight) p = 1;
-        else if (top > 0 && top < containerHeight) p = Math.max(0, Math.min(1, (1 - top / containerHeight) * 2));
-        else if (bottom > 0 && bottom < containerHeight) p = Math.max(0, Math.min(1, (bottom / containerHeight) * 2));
-        updated[id] = p;
-      });
-      scrollProgressRef.current = updated;
-      setScrollProgress({ ...updated });
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (isAnimatingRef.current) return;
-
-      const progress = scrollProgressRef.current;
-      let bestId = "home";
-      let bestP = -1;
-      Object.entries(progress).forEach(([id, p]) => { if (p > bestP) { bestP = p; bestId = id; } });
-
-      const currentIdx = SECTION_ORDER.indexOf(bestId);
-      const dir = e.deltaY > 0 ? 1 : -1;
-      const nextIdx = Math.max(0, Math.min(SECTION_ORDER.length - 1, currentIdx + dir));
-      if (nextIdx === currentIdx) return;
-
-      isAnimatingRef.current = true;
-      const nextId = SECTION_ORDER[nextIdx];
-      if (nextId === "home") {
-        container.scrollTo({ top: 0, behavior: "smooth" });
-      } else {
-        observerRefs.current[nextId]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const onScroll = () => {
+      setScrolled(el.scrollTop > 50)
+      const h = el.clientHeight
+      const updated: Record<string, number> = { ...progressRef.current }
+      for (const [id, node] of Object.entries(sectionRefs.current)) {
+        if (!node) continue
+        const { top, bottom } = node.getBoundingClientRect()
+        if (top <= 0 && bottom >= h) updated[id] = 1
+        else if (top > 0 && top < h) updated[id] = Math.max(0, Math.min(1, (1 - top / h) * 2))
+        else if (bottom > 0 && bottom < h) updated[id] = Math.max(0, Math.min(1, (bottom / h) * 2))
+        else updated[id] = 0
       }
-      setTimeout(() => { isAnimatingRef.current = false; }, 900);
-    };
-
-    handleScroll();
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    container.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      container.removeEventListener("wheel", handleWheel);
-    };
-  }, []);
-
-  const getSectionStyle = (id: string) => {
-    const p = Math.max(0, Math.min(1, scrollProgress[id] || 0));
-    if (!hasScrolled) {
-      return { opacity: 0, transform: "translateY(32px)", filter: "blur(5px)", transition: "none", pointerEvents: "none" as const };
+      progressRef.current = updated
+      setProgress({ ...updated })
     }
-    return {
-      opacity: p,
-      transform: `translateY(${(1 - p) * 32}px)`,
-      filter: `blur(${(1 - p) * 5}px)`,
-      transition: "opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1), filter 0.5s ease",
-      pointerEvents: p < 0.1 ? "none" as const : "auto" as const,
-    };
-  };
 
-  const getActiveSection = () => {
-    let activeId = "";
-    let maxP = 0;
-    Object.entries(scrollProgress).forEach(([id, p]) => {
-      if (p > maxP && p > 0.5) { maxP = p; activeId = id; }
-    });
-    return activeId;
-  };
-
-  const sectionOrder = ["home", "about-us", "what-makes-different", "skills-services", "projects", "references", "contact"];
-  const sectionTitles: Record<string, string> = {
-    "home": t.nav.home,
-    "about-us": t.whoWeAre.title,
-    "what-makes-different": t.whatMakesDifferent.title,
-    "skills-services": t.skillsServices.title,
-    "projects": t.projects.title,
-    "references": t.references.title,
-    "contact": t.footer.contact,
-  };
-
-  const activeSection = getActiveSection() || "home";
-  const activeIdx = sectionOrder.indexOf(activeSection);
-  const nextSectionId = activeIdx >= 0 && activeIdx < sectionOrder.length - 1 ? sectionOrder[activeIdx + 1] : null;
-  const nextSectionLabel = nextSectionId ? sectionTitles[nextSectionId] : null;
-
-  const atHero = (scrollProgress["about-us"] ?? 0) < 0.15;
-
-  const sidebarSections = [
-    { id: "about-us", label: t.nav.whoWeAre },
-    { id: "what-makes-different", label: t.whatMakesDifferent.title },
-    { id: "skills-services", label: t.skillsServices.title },
-    { id: "projects", label: t.nav.ourProjects },
-    { id: "references", label: t.nav.references },
-    { id: "contact", label: t.nav.contact },
-  ];
-
-  const sectionNames = [
-    { id: "home", label: t.nav.home },
-    { id: "about-us", label: t.nav.whoWeAre },
-    { id: "projects", label: t.nav.ourProjects },
-    { id: "references", label: t.nav.references },
-    { id: "contact", label: t.nav.contact },
-  ];
-
-  const scrollToSection = (id: string) => {
-    const container = containerRef.current;
-    if (!container) return;
-    if (id === "home") { container.scrollTo({ top: 0, behavior: "smooth" }); return; }
-    const el = observerRefs.current[id];
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const [projectCounts, setProjectCounts] = useState({ yachts: 0, residences: 0 });
-  const countAnimatedRef = useRef(false);
-
-  useEffect(() => {
-    if (scrollProgress["projects"] > 0.5 && !countAnimatedRef.current) {
-      countAnimatedRef.current = true;
-      const duration = 1400;
-      const start = performance.now();
-      const animate = (now: number) => {
-        const elapsed = now - start;
-        const t = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        setProjectCounts({ yachts: Math.round(eased * 80), residences: Math.round(eased * 20) });
-        if (t < 1) requestAnimationFrame(animate);
-      };
-      requestAnimationFrame(animate);
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      if (animating.current) return
+      const current = getActiveSection()
+      const idx = SECTIONS.indexOf(current as Section)
+      const dir = e.deltaY > 0 ? 1 : -1
+      const next = Math.max(0, Math.min(SECTIONS.length - 1, idx + dir))
+      if (next === idx) return
+      animating.current = true
+      const target = SECTIONS[next]
+      if (target === 'home') el.scrollTo({ top: 0, behavior: 'smooth' })
+      else sectionRefs.current[target]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setTimeout(() => { animating.current = false }, 900)
     }
-  }, [scrollProgress]);
 
-  const sectionBase = { height: "100vh" };
+    onScroll()
+    el.addEventListener('scroll', onScroll, { passive: true })
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => { el.removeEventListener('scroll', onScroll); el.removeEventListener('wheel', onWheel) }
+  }, [getActiveSection])
+
+  const sectionStyle = (id: string) => {
+    const p = Math.max(0, Math.min(1, progress[id] || 0))
+    if (!scrolled) return { opacity: 0, transform: 'translateY(32px)', filter: 'blur(5px)', transition: 'none', pointerEvents: 'none' as const }
+    return { opacity: p, transform: `translateY(${(1 - p) * 32}px)`, filter: `blur(${(1 - p) * 5}px)`, transition: 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1), filter 0.5s ease', pointerEvents: p < 0.1 ? 'none' as const : 'auto' as const }
+  }
+
+  const scrollTo = (id: string) => {
+    if (id === 'home') containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    else sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const active = getActiveSection()
+
+  const sidebarItems = [
+    { id: 'about', label: t.nav.whoWeAre },
+    { id: 'different', label: t.different.title },
+    { id: 'services', label: t.services.title },
+    { id: 'projects', label: t.nav.projects },
+    { id: 'references', label: t.nav.references },
+    { id: 'contact', label: t.nav.contact },
+  ]
+
+  const navItems = [
+    { id: 'home', label: t.nav.home },
+    { id: 'about', label: t.nav.whoWeAre },
+    { id: 'projects', label: t.nav.projects },
+    { id: 'references', label: t.nav.references },
+    { id: 'contact', label: t.nav.contact },
+  ]
 
   return (
-    <div
-      ref={containerRef}
-      className="h-screen overflow-y-scroll"
-      style={{ overscrollBehavior: "none" }}
-    >
-      {/* Overlays */}
-      <SectionSidebar
-        sections={sidebarSections}
-        scrollProgress={scrollProgress}
-        onNavigate={scrollToSection}
-        visible={true}
-      />
+    <div ref={containerRef} className="h-screen overflow-y-scroll" style={{ overscrollBehavior: 'none' }}>
+      <SectionSidebar items={sidebarItems} progress={progress} onNavigate={scrollTo} />
 
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#A2834E]/20">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="w-24" />
-            <a href="/" className="absolute left-1/2 -translate-x-1/2 flex-shrink-0">
-              <span className="text-xl sm:text-2xl tracking-[0.3em] text-[#A2834E] font-light" style={{ fontFamily: "'QuickExpress', 'Cinzel', serif" }}>
-                YACHT AUDIO
-              </span>
-            </a>
-            <div className="flex items-center gap-1">
-              <LanguageSelector />
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Toggle menu">
-                {isMenuOpen ? <X className="w-6 h-6 text-[#A2834E]" /> : <Menu className="w-6 h-6 text-[#A2834E]" />}
-              </button>
-            </div>
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gold/20">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+          <div className="w-24" />
+          <a href="/" className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl tracking-[0.3em] text-gold font-light font-[Cinzel,serif]">YACHT AUDIO</a>
+          <div className="flex items-center gap-1">
+            <LanguageSelector />
+            <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Menu">
+              {menuOpen ? <X className="w-6 h-6 text-gold" /> : <Menu className="w-6 h-6 text-gold" />}
+            </button>
           </div>
         </nav>
-        {isMenuOpen && (
-          <div className="absolute top-16 right-0 w-72 bg-white border border-[#A2834E]/20 shadow-xl rounded-bl-lg">
+        {menuOpen && (
+          <div className="absolute top-16 right-0 w-72 bg-white border border-gold/20 shadow-xl rounded-bl-lg">
             <ul className="px-4 py-4">
-              {sectionNames.map((section) => (
-                <li key={section.id}>
-                  <button
-                    onClick={() => { scrollToSection(section.id); setIsMenuOpen(false); }}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${getActiveSection() === section.id ? "bg-[#A2834E]/10 text-[#A2834E] font-semibold" : "text-gray-700 hover:bg-gray-100"}`}
-                  >
-                    {section.label}
-                  </button>
+              {navItems.map(s => (
+                <li key={s.id}>
+                  <button onClick={() => { scrollTo(s.id); setMenuOpen(false) }} className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${active === s.id ? 'bg-gold/10 text-gold font-semibold' : 'text-gray-700 hover:bg-gray-100'}`}>{s.label}</button>
                 </li>
               ))}
             </ul>
@@ -214,73 +130,51 @@ export default function Home() {
         )}
       </header>
 
-      {/* ─── Section 1: Hero ─── */}
-      <section
-        ref={(el) => (observerRefs.current["home"] = el)}
-        style={sectionBase}
-      >
+      {/* Hero */}
+      <section ref={el => { sectionRefs.current['home'] = el }} className="h-screen">
         <HeroVideo />
       </section>
 
-      {/* ─── Section 2: Who We Are ─── */}
-      <section
-        id="about-us"
-        ref={(el) => (observerRefs.current["about-us"] = el)}
-        className="bg-gray-50 overflow-hidden"
-        style={{ ...sectionBase, ...getSectionStyle("about-us") }}
-      >
+      {/* Who We Are */}
+      <section id="about" ref={el => { sectionRefs.current['about'] = el }} className="bg-gray-50 overflow-hidden h-screen" style={sectionStyle('about')}>
         <div className="h-full flex flex-col pt-20">
-          <div className="border-b border-[#A2834E]/20 py-5 px-8">
-            <h2 className="text-3xl md:text-4xl text-[#A2834E] text-center">{t.whoWeAre.title}</h2>
+          <div className="border-b border-gold/20 py-5 px-8">
+            <h2 className="text-3xl md:text-4xl text-gold text-center">{t.whoWeAre.title}</h2>
           </div>
           <div className="flex-1 flex flex-col justify-center py-6 px-8 overflow-hidden">
             <div className="max-w-6xl mx-auto w-full">
               <div className="grid grid-cols-3 gap-4 mb-8">
-                {[
-                  { src: "https://images.unsplash.com/photo-1697124510322-27ef594f67fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", alt: "Luxury yacht interior" },
-                  { src: "https://images.unsplash.com/photo-1743685889437-210ad44b6c5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", alt: "Premium cinema" },
-                  { src: "https://images.unsplash.com/photo-1692246427974-c28629e3617e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", alt: "Audio visual system" },
-                ].map((img) => (
-                  <div key={img.alt} className="rounded-lg overflow-hidden shadow-md h-36">
-                    <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
+                {['https://images.unsplash.com/photo-1697124510322-27ef594f67fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600', 'https://images.unsplash.com/photo-1743685889437-210ad44b6c5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600', 'https://images.unsplash.com/photo-1692246427974-c28629e3617e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600'].map((src, i) => (
+                  <div key={i} className="rounded-lg overflow-hidden shadow-md h-36">
+                    <img src={src} alt="" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
               <div className="text-center space-y-3 text-gray-800 leading-relaxed">
-                <p>{t.whoWeAre.intro1}</p>
-                <p>{t.whoWeAre.intro2}</p>
-                <p>{t.whoWeAre.intro3}</p>
-                <p>{t.whoWeAre.intro4}</p>
-                <p>{t.whoWeAre.intro5}</p>
+                <p>{t.whoWeAre.p1}</p><p>{t.whoWeAre.p2}</p><p>{t.whoWeAre.p3}</p><p>{t.whoWeAre.p4}</p><p>{t.whoWeAre.p5}</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Section 3: What Makes Us Different ─── */}
-      <section
-        id="what-makes-different"
-        ref={(el) => (observerRefs.current["what-makes-different"] = el)}
-        className="bg-gray-50 overflow-hidden"
-        style={{ ...sectionBase, ...getSectionStyle("what-makes-different") }}
-      >
+      {/* What Makes Us Different */}
+      <section id="different" ref={el => { sectionRefs.current['different'] = el }} className="bg-gray-50 overflow-hidden h-screen" style={sectionStyle('different')}>
         <div className="h-full flex flex-col pt-20">
-          <div className="border-b border-[#A2834E]/20 py-5 px-8">
-            <h2 className="text-3xl md:text-4xl text-[#A2834E] text-center">{t.whatMakesDifferent.title}</h2>
+          <div className="border-b border-gold/20 py-5 px-8">
+            <h2 className="text-3xl md:text-4xl text-gold text-center">{t.different.title}</h2>
           </div>
           <div className="flex-1 flex items-center py-6 px-8">
             <div className="max-w-5xl mx-auto w-full grid md:grid-cols-2 gap-6">
               {[
-                { num: "01", title: t.whatMakesDifferent.card1Title, text: t.whatMakesDifferent.card1Text },
-                { num: "02", title: t.whatMakesDifferent.card2Title, text: t.whatMakesDifferent.card2Text },
-                { num: "03", title: t.whatMakesDifferent.card3Title, text: t.whatMakesDifferent.card3Text },
-                { num: "04", title: t.whatMakesDifferent.card4Title, text: t.whatMakesDifferent.card4Text },
-              ].map((card) => (
-                <div key={card.num} className="bg-white p-6 rounded-lg shadow-sm">
-                  <div className="w-12 h-12 bg-[#A2834E] rounded-full mb-4 flex items-center justify-center text-white">{card.num}</div>
-                  <h3 className="text-xl mb-2 text-gray-900">{card.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{card.text}</p>
+                { title: t.different.c1Title, text: t.different.c1 },
+                { title: t.different.c2Title, text: t.different.c2 },
+                { title: t.different.c3Title, text: t.different.c3 },
+                { title: t.different.c4Title, text: t.different.c4 },
+              ].map(card => (
+                <div key={card.title} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                  <h3 className="text-gold text-lg font-semibold mb-3">{card.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{card.text}</p>
                 </div>
               ))}
             </div>
@@ -288,31 +182,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Section 4: Skills & Services ─── */}
-      <section
-        id="skills-services"
-        ref={(el) => (observerRefs.current["skills-services"] = el)}
-        className="bg-gray-50 overflow-hidden"
-        style={{ ...sectionBase, ...getSectionStyle("skills-services") }}
-      >
+      {/* Skills & Services */}
+      <section id="services" ref={el => { sectionRefs.current['services'] = el }} className="bg-white overflow-hidden h-screen" style={sectionStyle('services')}>
         <div className="h-full flex flex-col pt-20">
-          <div className="border-b border-[#A2834E]/20 py-5 px-8">
-            <h2 className="text-3xl md:text-4xl text-[#A2834E] text-center">{t.skillsServices.title}</h2>
+          <div className="border-b border-gold/20 py-5 px-8">
+            <h2 className="text-3xl md:text-4xl text-gold text-center">{t.services.title}</h2>
           </div>
           <div className="flex-1 flex items-center py-6 px-8">
-            <div className="max-w-6xl mx-auto w-full grid grid-cols-2 md:grid-cols-3 gap-10">
+            <div className="max-w-5xl mx-auto w-full grid md:grid-cols-3 gap-6">
               {[
-                { title: t.skillsServices.video, text: t.skillsServices.videoText },
-                { title: t.skillsServices.audio, text: t.skillsServices.audioText },
-                { title: t.skillsServices.control, text: t.skillsServices.controlText },
-                { title: t.skillsServices.security, text: t.skillsServices.securityText },
-                { title: t.skillsServices.it, text: t.skillsServices.itText },
-                { title: t.skillsServices.installation, text: t.skillsServices.installationText },
-              ].map((item) => (
-                <div key={item.title} className="text-center">
-                  <div className="w-2 h-2 bg-[#A2834E] rounded-full mx-auto mb-3" />
-                  <h3 className="text-lg mb-2 text-gray-900">{item.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{item.text}</p>
+                { title: t.services.video, text: t.services.videoText },
+                { title: t.services.audio, text: t.services.audioText },
+                { title: t.services.control, text: t.services.controlText },
+                { title: t.services.security, text: t.services.securityText },
+                { title: t.services.it, text: t.services.itText },
+                { title: t.services.support, text: t.services.supportText },
+              ].map(s => (
+                <div key={s.title} className="text-center p-6">
+                  <h3 className="text-gold text-lg font-semibold mb-3">{s.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{s.text}</p>
                 </div>
               ))}
             </div>
@@ -320,61 +208,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Section 5: Projects ─── */}
-      <section
-        id="projects"
-        ref={(el) => (observerRefs.current["projects"] = el)}
-        className="bg-[#111] overflow-hidden"
-        style={{ ...sectionBase, ...getSectionStyle("projects") }}
-      >
-        <div className="h-full flex flex-col pt-20">
-          <div className="px-8 py-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <p className="text-[#A2834E] text-xs tracking-[0.3em] uppercase mb-2">{t.projects.subtitle}</p>
-              <h2 className="text-4xl md:text-5xl font-light tracking-wide text-white">{t.projects.title}</h2>
-            </div>
-            <div className="flex gap-8 items-center">
-              <div>
-                <div className="text-3xl font-light text-[#A2834E]">{projectCounts.yachts}+</div>
-                <div className="text-xs tracking-widest text-white/40 uppercase mt-1">{t.projects.superYachts}</div>
-              </div>
-              <div className="w-px h-10 bg-[#A2834E]/30" />
-              <div>
-                <div className="text-3xl font-light text-[#A2834E]">{projectCounts.residences}+</div>
-                <div className="text-xs tracking-widest text-white/40 uppercase mt-1">{t.projects.residences}</div>
-              </div>
-            </div>
-          </div>
-          <div className="flex-1 overflow-hidden px-8 pb-6">
-            <ProjectsCarousel />
-          </div>
-        </div>
-      </section>
+      {/* Projects */}
+      <ProjectsSection progress={progress} sectionStyle={sectionStyle} sectionRefs={sectionRefs} t={t} />
 
-      {/* ─── Section 6: References ─── */}
-      <section
-        id="references"
-        ref={(el) => (observerRefs.current["references"] = el)}
-        className="bg-white overflow-hidden"
-        style={{ ...sectionBase, ...getSectionStyle("references") }}
-      >
+      {/* References */}
+      <section id="references" ref={el => { sectionRefs.current['references'] = el }} className="bg-white overflow-hidden h-screen" style={sectionStyle('references')}>
         <div className="h-full flex flex-col pt-20">
-          <div className="border-b border-[#A2834E]/20 py-5 px-8">
-            <h2 className="text-3xl md:text-4xl text-[#A2834E] text-center">{t.references.title}</h2>
+          <div className="border-b border-gold/20 py-5 px-8">
+            <h2 className="text-3xl md:text-4xl text-gold text-center">{t.references.title}</h2>
             <p className="text-center text-gray-500 text-sm mt-1">{t.references.subtitle}</p>
           </div>
           <div className="flex-1 flex items-center py-6 px-8">
             <div className="max-w-3xl mx-auto w-full grid md:grid-cols-2 gap-6">
               {[
-                { quote: t.references.testimonial1, name: "Brett Smith", role: `${t.references.captain} M/Y Eclipse – 162m Blohm+Voss` },
-                { quote: t.references.testimonialB, name: t.references.clientB, role: "" },
-                { quote: t.references.testimonialC, name: t.references.clientC, role: "" },
-                { quote: t.references.testimonialD, name: t.references.clientD, role: "" },
-              ].map((item) => (
-                <div key={item.name} className="bg-gray-50 p-6 rounded-lg border border-gray-100">
-                  <p className="text-gray-700 italic text-sm leading-relaxed mb-4">"{item.quote}"</p>
-                  <p className="font-semibold text-[#A2834E] text-sm">{item.name}</p>
-                  {item.role && <p className="text-xs text-gray-400 mt-0.5">{item.role}</p>}
+                { quote: t.references.t1, name: t.references.t1Name, role: t.references.t1Role },
+                { quote: t.references.t2, name: t.references.t2Name, role: '' },
+                { quote: t.references.t3, name: t.references.t3Name, role: '' },
+                { quote: t.references.t4, name: t.references.t4Name, role: '' },
+              ].map(r => (
+                <div key={r.name} className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                  <p className="text-gray-700 italic text-sm leading-relaxed mb-4">"{r.quote}"</p>
+                  <p className="font-semibold text-gold text-sm">{r.name}</p>
+                  {r.role && <p className="text-xs text-gray-400 mt-0.5">{r.role}</p>}
                 </div>
               ))}
             </div>
@@ -382,36 +237,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Section 7: Contact ─── */}
-      <footer
-        id="contact"
-        ref={(el) => (observerRefs.current["contact"] = el)}
-        className="bg-gray-100"
-        style={sectionBase}
-      >
+      {/* Contact / Footer */}
+      <footer id="contact" ref={el => { sectionRefs.current['contact'] = el }} className="bg-gray-100 h-screen">
         <div className="h-full flex flex-col justify-center pt-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto w-full">
             <div className="grid md:grid-cols-3 gap-8 mb-10">
               <div>
                 <h4 className="text-lg mb-4 font-semibold tracking-wide">YACHT AUDIO LTD</h4>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  Oberlandstr. 13-14<br />12099 Berlin<br />Germany
-                </p>
+                <p className="text-gray-600 leading-relaxed text-sm">Oberlandstr. 13-14<br />12099 Berlin<br />Germany</p>
               </div>
               <div>
                 <h5 className="mb-4 font-semibold text-sm tracking-widest uppercase">{t.footer.contact}</h5>
                 <ul className="space-y-2 text-gray-600 text-sm">
                   <li>{t.footer.office}: +49 30 547074-75</li>
                   <li>{t.footer.fax}: +49 30 547074-76</li>
-                  <li><a href="mailto:keepusbusy@yachtaudio.com" className="hover:text-[#A2834E] transition-colors">keepusbusy@yachtaudio.com</a></li>
-                  <li><a href="http://www.yachtaudio.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A2834E] transition-colors">www.yachtaudio.com</a></li>
+                  <li><a href="mailto:keepusbusy@yachtaudio.com" className="hover:text-gold transition-colors">keepusbusy@yachtaudio.com</a></li>
+                  <li><a href="http://www.yachtaudio.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors">www.yachtaudio.com</a></li>
                 </ul>
               </div>
               <div>
                 <h5 className="mb-4 font-semibold text-sm tracking-widest uppercase">{t.footer.resources}</h5>
                 <ul className="space-y-2 text-gray-600 text-sm">
-                  <li><a href="#brochure" className="hover:text-[#A2834E] transition-colors">{t.footer.brochure}</a></li>
-                  <li><Link to="/legal-notice" className="hover:text-[#A2834E] transition-colors">{t.footer.legal}</Link></li>
+                  <li><a href="#brochure" className="hover:text-gold transition-colors">{t.footer.brochure}</a></li>
+                  <li><Link to="/legal-notice" className="hover:text-gold transition-colors">{t.footer.legal}</Link></li>
                 </ul>
               </div>
             </div>
@@ -422,5 +270,60 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  );
+  )
+}
+
+/* ── Projects section with animated counters ── */
+
+function ProjectsSection({ progress, sectionStyle, sectionRefs, t }: {
+  progress: Record<string, number>
+  sectionStyle: (id: string) => React.CSSProperties
+  sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>
+  t: typeof translations['EN']
+}) {
+  const [counts, setCounts] = useState({ yachts: 0, residences: 0 })
+  const animated = useRef(false)
+
+  useEffect(() => {
+    if (progress['projects'] > 0.5 && !animated.current) {
+      animated.current = true
+      const dur = 1400
+      const start = performance.now()
+      const tick = (now: number) => {
+        const e = Math.min((now - start) / dur, 1)
+        const ease = 1 - Math.pow(1 - e, 3)
+        setCounts({ yachts: Math.round(ease * 80), residences: Math.round(ease * 20) })
+        if (e < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }
+  }, [progress])
+
+  return (
+    <section id="projects" ref={el => { sectionRefs.current['projects'] = el }} className="bg-gray-50 overflow-hidden h-screen" style={sectionStyle('projects')}>
+      <div className="h-full flex flex-col pt-20">
+        <div className="border-b border-gold/20 py-5 px-8">
+          <h2 className="text-3xl md:text-4xl text-gold text-center">{t.projects.title}</h2>
+          <p className="text-center text-gray-500 text-sm mt-1">{t.projects.subtitle}</p>
+        </div>
+        <div className="flex-1 flex flex-col justify-center py-6 px-8">
+          <div className="max-w-4xl mx-auto w-full text-center">
+            <div className="grid grid-cols-2 gap-8 mb-12">
+              <div>
+                <p className="text-5xl md:text-6xl text-gold font-light">{counts.yachts}+</p>
+                <p className="text-gray-500 text-sm mt-2 tracking-widest uppercase">{t.projects.yachts}</p>
+              </div>
+              <div>
+                <p className="text-5xl md:text-6xl text-gold font-light">{counts.residences}+</p>
+                <p className="text-gray-500 text-sm mt-2 tracking-widest uppercase">{t.projects.residences}</p>
+              </div>
+            </div>
+            <Link to="/projects" className="inline-block border border-gold text-gold px-8 py-3 text-sm tracking-[0.2em] uppercase hover:bg-gold hover:text-white transition-all duration-300">
+              {t.nav.projects}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }

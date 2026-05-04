@@ -1,28 +1,15 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react'
+import type { Lang } from '../translations/translations'
 
-type Language = 'EN' | 'DE' | 'FR' | 'IT';
+const LanguageContext = createContext<{ lang: Lang; setLang: (l: Lang) => void } | null>(null)
 
-interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [lang, setLang] = useState<Lang>('EN')
+  return <LanguageContext.Provider value={{ lang, setLang }}>{children}</LanguageContext.Provider>
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('EN');
-
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
-};
+export function useLang() {
+  const ctx = useContext(LanguageContext)
+  if (!ctx) throw new Error('useLang must be used within LanguageProvider')
+  return ctx
+}

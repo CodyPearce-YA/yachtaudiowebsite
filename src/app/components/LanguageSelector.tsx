@@ -1,61 +1,42 @@
-import { useState, useRef, useEffect } from 'react';
-import { Globe } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useState } from 'react'
+import { useLang } from '../contexts/LanguageContext'
+import type { Lang } from '../translations/translations'
+
+const LANGS: { code: Lang; label: string }[] = [
+  { code: 'EN', label: 'EN' },
+  { code: 'DE', label: 'DE' },
+  { code: 'FR', label: 'FR' },
+  { code: 'IT', label: 'IT' },
+]
 
 export function LanguageSelector() {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const { language, setLanguage } = useLanguage();
-
-  const languages = [
-    { code: 'EN', label: 'English' },
-    { code: 'DE', label: 'Deutsch' },
-    { code: 'FR', label: 'Français' },
-    { code: 'IT', label: 'Italiano' },
-  ] as const;
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  const { lang, setLang } = useLang()
+  const [open, setOpen] = useState(false)
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-        aria-label="Select language"
+        onClick={() => setOpen(!open)}
+        className="px-2 py-1 text-sm text-gold hover:bg-gold/10 rounded transition-colors tracking-wider"
       >
-        <Globe className="w-5 h-5 text-[#A2834E]" />
-        <span className="text-sm font-medium text-gray-700">{language}</span>
+        {lang}
       </button>
-
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => {
-                setLanguage(lang.code);
-                setIsOpen(false);
-              }}
-              className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors ${
-                language === lang.code ? 'bg-[#A2834E]/10 text-[#A2834E] font-semibold' : 'text-gray-700'
-              }`}
-            >
-              {lang.label}
-            </button>
-          ))}
-        </div>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-1 bg-white border border-gold/20 shadow-lg rounded-lg overflow-hidden z-50">
+            {LANGS.map(l => (
+              <button
+                key={l.code}
+                onClick={() => { setLang(l.code); setOpen(false) }}
+                className={`block w-full px-4 py-2 text-sm text-left transition-colors ${lang === l.code ? 'bg-gold/10 text-gold font-semibold' : 'text-gray-700 hover:bg-gray-50'}`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
-  );
+  )
 }
