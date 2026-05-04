@@ -5,7 +5,7 @@ export default function LegalNotice() {
     <div className="min-h-screen bg-white">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gold/20">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center items-center h-16">
-          <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] text-gold font-light font-[Cinzel,serif]">YACHT AUDIO</Link>
+          <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] text-gold font-light font-[var(--font-display)]">YACHT AUDIO</Link>
         </nav>
       </header>
 

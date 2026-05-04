@@ -1,11 +1,19 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'QuickExpress';
+  src: url('/fonts/QuickExpress.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-gold: #A2834E;
   --color-gold-light: #C4A97D;
   --color-gold-dark: #8B7040;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-display: 'QuickExpress', 'Cinzel', 'Times New Roman', serif;
 }
 
 @layer base {

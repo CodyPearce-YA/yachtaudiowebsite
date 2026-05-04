@@ -109,7 +109,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gold/20">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
           <div className="w-24" />
-          <a href="/" className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl tracking-[0.3em] text-gold font-light font-[Cinzel,serif]">YACHT AUDIO</a>
+          <a href="/" className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl tracking-[0.3em] text-gold font-light font-[var(--font-display)]">YACHT AUDIO</a>
           <div className="flex items-center gap-1">
             <LanguageSelector />
             <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Menu">

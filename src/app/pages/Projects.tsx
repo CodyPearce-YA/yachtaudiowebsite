@@ -36,7 +36,7 @@ export default function Projects() {
           <Link to="/" className="flex items-center gap-2 text-gold hover:opacity-70 transition-opacity text-sm tracking-widest uppercase">
             <ArrowLeft className="w-4 h-4" />Back
           </Link>
-          <Link to="/" className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl tracking-[0.3em] text-gold font-light font-[Cinzel,serif]">YACHT AUDIO</Link>
+          <Link to="/" className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl tracking-[0.3em] text-gold font-light font-[var(--font-display)]">YACHT AUDIO</Link>
           <div className="w-16" />
         </nav>
       </header>
