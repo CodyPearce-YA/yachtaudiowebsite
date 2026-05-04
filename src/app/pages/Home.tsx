@@ -138,39 +138,6 @@ export default function Home() {
     <div ref={containerRef} className="h-screen overflow-y-scroll" style={{ overscrollBehavior: 'none' }}>
       <SectionSidebar items={sidebarItems} progress={progress} onNavigate={scrollTo} />
 
-      {/* ═══ Fixed background layer ── spans entire page ── */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Marine gradient base */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#f8f6f3] via-white to-[#f5f3ef]" />
-        {/* Large floating orbs */}
-        <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.12) 0%, transparent 70%)', top: '5%', right: '-10%' }}
-          animate={{ y: [0, -30, 0], x: [0, 15, 0], scale: [1, 1.05, 1] }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(196,169,125,0.1) 0%, transparent 70%)', top: '30%', left: '-8%' }}
-          animate={{ y: [0, 25, 0], x: [0, -20, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute w-[700px] h-[700px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.08) 0%, transparent 70%)', bottom: '10%', right: '5%' }}
-          animate={{ y: [0, -40, 0], scale: [1, 1.08, 1] }}
-          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute w-[400px] h-[400px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(139,112,64,0.09) 0%, transparent 70%)', top: '60%', left: '15%' }}
-          animate={{ y: [0, 35, 0], x: [0, 25, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        {/* Subtle grid overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#A2834E 1px, transparent 1px), linear-gradient(90deg, #A2834E 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
-      </div>
-
       {/* ═══ Header ═══ */}
       <motion.header
         className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-2xl border-b border-gold/10"
@@ -230,7 +197,13 @@ export default function Home() {
       </section>
 
       {/* ═══ Who We Are ═══ */}
-      <section ref={el => { sectionRefs.current['about'] = el }} className="h-screen relative z-10">
+      <section ref={el => { sectionRefs.current['about'] = el }} className="h-screen relative overflow-hidden">
+        {/* Animated background orbs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div className="absolute w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.15) 0%, transparent 70%)', top: '-10%', right: '-10%' }} animate={{ y: [0, -30, 0], x: [0, 20, 0], scale: [1, 1.1, 1] }} transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }} />
+          <motion.div className="absolute w-[400px] h-[400px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(196,169,125,0.12) 0%, transparent 70%)', bottom: '10%', left: '-5%' }} animate={{ y: [0, 25, 0], x: [0, -15, 0] }} transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }} />
+          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #A2834E 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+        </div>
         <div className="h-full flex flex-col">
           <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
@@ -294,7 +267,12 @@ export default function Home() {
       </section>
 
       {/* ═══ What Makes Us Different ═══ */}
-      <section ref={el => { sectionRefs.current['different'] = el }} className="h-screen relative z-10">
+      <section ref={el => { sectionRefs.current['different'] = el }} className="h-screen relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div className="absolute w-[600px] h-[600px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.12) 0%, transparent 70%)', top: '20%', left: '-15%' }} animate={{ y: [0, 40, 0], scale: [1, 1.15, 1] }} transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }} />
+          <motion.div className="absolute w-[450px] h-[450px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(139,112,64,0.1) 0%, transparent 70%)', bottom: '5%', right: '-8%' }} animate={{ y: [0, -30, 0], x: [0, 20, 0] }} transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }} />
+          <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'linear-gradient(rgba(162,131,78,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(162,131,78,0.3) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+        </div>
         <div className="h-full flex flex-col">
           <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
@@ -347,7 +325,11 @@ export default function Home() {
       </section>
 
       {/* ═══ Skills & Services ═══ */}
-      <section ref={el => { sectionRefs.current['services'] = el }} className="h-screen relative z-10">
+      <section ref={el => { sectionRefs.current['services'] = el }} className="h-screen relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div className="absolute w-[550px] h-[550px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(196,169,125,0.1) 0%, transparent 70%)', top: '-5%', left: '10%' }} animate={{ y: [0, 35, 0], x: [0, -25, 0] }} transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }} />
+          <motion.div className="absolute w-[350px] h-[350px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.12) 0%, transparent 70%)', bottom: '15%', right: '5%' }} animate={{ y: [0, -20, 0], scale: [1, 1.2, 1] }} transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }} />
+        </div>
         <div className="h-full flex flex-col">
           <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
@@ -403,7 +385,11 @@ export default function Home() {
       </section>
 
       {/* ═══ Projects ═══ */}
-      <section ref={el => { sectionRefs.current['projects'] = el }} className="h-screen relative z-10">
+      <section ref={el => { sectionRefs.current['projects'] = el }} className="h-screen relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div className="absolute w-[700px] h-[700px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.1) 0%, transparent 70%)', top: '10%', right: '-12%' }} animate={{ y: [0, -40, 0], x: [0, 30, 0] }} transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }} />
+          <motion.div className="absolute w-[400px] h-[400px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(196,169,125,0.08) 0%, transparent 70%)', bottom: '20%', left: '0%' }} animate={{ y: [0, 30, 0] }} transition={{ duration: 17, repeat: Infinity, ease: 'easeInOut' }} />
+        </div>
         <div className="h-full flex flex-col">
           <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
@@ -466,7 +452,11 @@ export default function Home() {
       </section>
 
       {/* ═══ References ═══ */}
-      <section ref={el => { sectionRefs.current['references'] = el }} className="h-screen relative z-10">
+      <section ref={el => { sectionRefs.current['references'] = el }} className="h-screen relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div className="absolute w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.1) 0%, transparent 70%)', top: '5%', left: '-8%' }} animate={{ y: [0, 25, 0], x: [0, 20, 0] }} transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }} />
+          <motion.div className="absolute w-[450px] h-[450px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(139,112,64,0.08) 0%, transparent 70%)', bottom: '10%', right: '-5%' }} animate={{ y: [0, -35, 0], scale: [1, 1.1, 1] }} transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }} />
+        </div>
         <div className="h-full flex flex-col">
           <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
