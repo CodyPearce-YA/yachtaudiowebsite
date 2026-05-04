@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router'
 import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react'
-import { motion, useScroll, useTransform, useInView, AnimatePresence, useSpring, useMotionValue } from 'motion/react'
+import { motion, useInView, AnimatePresence, useSpring, useMotionValue } from 'motion/react'
 import { useLang } from '../contexts/LanguageContext'
 import { translations } from '../translations/translations'
 import { LanguageSelector } from '../components/LanguageSelector'
@@ -38,52 +38,22 @@ function AnimatedCounter({ target, label, suffix = '+' }: { target: number; labe
   }, [rounded])
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, scale: 0.8 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="text-center"
-    >
+    <motion.div ref={ref} initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="text-center">
       <p className="text-6xl md:text-8xl font-light text-gold font-[var(--font-display)]">{display}{suffix}</p>
       <p className="text-gray-500 text-sm mt-3 tracking-[0.2em] uppercase">{label}</p>
     </motion.div>
   )
 }
 
-/* ─── Floating particles background ─── */
-function ParticlesBackground() {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 15 + 10,
-    delay: Math.random() * 5,
-  }))
-
+/* ─── Background orbs ─── */
+function BgOrbs() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map(p => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full bg-gold/10"
-          style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.6, 0.2],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </div>
+    <>
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
+      <div className="orb orb-4" />
+    </>
   )
 }
 
@@ -99,8 +69,8 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null)
   const animating = useRef(false)
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
-  const [progress, setProgress] = useState<Record<string, number>>({})
   const progressRef = useRef<Record<string, number>>({})
+  const [progress, setProgress] = useState<Record<string, number>>({})
 
   const getActiveSection = useCallback((): Section => {
     let active: Section = 'home'
@@ -182,7 +152,7 @@ export default function Home() {
 
       {/* ═══ Header ═══ */}
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gold/10"
+        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-gold/10"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -204,15 +174,11 @@ export default function Home() {
               animate={{ opacity: 1, y: 0, scaleY: 1 }}
               exit={{ opacity: 0, y: -10, scaleY: 0.95 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute top-16 right-0 w-80 bg-white/95 backdrop-blur-xl border border-gold/20 shadow-2xl rounded-bl-2xl origin-top"
+              className="absolute top-16 right-0 w-80 bg-white/95 backdrop-blur-2xl border border-gold/20 shadow-2xl rounded-bl-2xl origin-top"
             >
               <ul className="px-4 py-6">
                 {navItems.map((s, i) => (
-                  <motion.li key={s.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
+                  <motion.li key={s.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
                     <button onClick={() => { scrollTo(s.id); setMenuOpen(false) }} className="w-full text-left px-4 py-3 rounded-lg transition-all text-gray-700 hover:bg-gold/5 hover:text-gold hover:translate-x-1">{s.label}</button>
                   </motion.li>
                 ))}
@@ -243,8 +209,8 @@ export default function Home() {
       </section>
 
       {/* ═══ Who We Are ═══ */}
-      <section ref={el => { sectionRefs.current['about'] = el }} className="h-screen bg-gray-50 relative overflow-hidden">
-        <ParticlesBackground />
+      <section ref={el => { sectionRefs.current['about'] = el }} className="h-screen bg-white bg-mesh bg-waves relative overflow-hidden">
+        <BgOrbs />
         <div className="h-full flex flex-col relative z-10">
           <div className="pt-24 pb-8 text-center">
             <motion.h2
@@ -267,7 +233,6 @@ export default function Home() {
 
           <div className="flex-1 flex flex-col justify-center px-8 pb-12 overflow-hidden">
             <div className="max-w-6xl mx-auto w-full">
-              {/* Image grid */}
               <motion.div
                 className="grid grid-cols-3 gap-4 mb-10"
                 initial="hidden"
@@ -290,7 +255,6 @@ export default function Home() {
                 ))}
               </motion.div>
 
-              {/* Text */}
               <motion.div
                 className="max-w-3xl mx-auto text-center space-y-4"
                 initial="hidden"
@@ -299,11 +263,7 @@ export default function Home() {
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
               >
                 {[t.whoWeAre.p1, t.whoWeAre.p2, t.whoWeAre.p3, t.whoWeAre.p4, t.whoWeAre.p5].map((text, i) => (
-                  <motion.p
-                    key={i}
-                    variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } } }}
-                    className="text-gray-700 leading-relaxed text-base md:text-lg"
-                  >
+                  <motion.p key={i} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } } }} className="text-gray-700 leading-relaxed text-base md:text-lg">
                     {text}
                   </motion.p>
                 ))}
@@ -314,9 +274,9 @@ export default function Home() {
       </section>
 
       {/* ═══ What Makes Us Different ═══ */}
-      <section ref={el => { sectionRefs.current['different'] = el }} className="h-screen bg-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
-        <div className="h-full flex flex-col">
+      <section ref={el => { sectionRefs.current['different'] = el }} className="h-screen bg-gray-50 bg-grid relative overflow-hidden">
+        <BgOrbs />
+        <div className="h-full flex flex-col relative z-10">
           <div className="pt-24 pb-8 text-center">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
@@ -339,10 +299,10 @@ export default function Home() {
           <div className="flex-1 flex items-center px-8 pb-12">
             <div className="max-w-5xl mx-auto w-full grid md:grid-cols-2 gap-6">
               {[
-                { title: t.different.c1Title, text: t.different.c1, icon: '◈', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
-                { title: t.different.c2Title, text: t.different.c2, icon: '◆', img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
-                { title: t.different.c3Title, text: t.different.c3, icon: '◇', img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
-                { title: t.different.c4Title, text: t.different.c4, icon: '◊', img: 'https://images.unsplash.com/photo-1563986768609-322da13575f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
+                { title: t.different.c1Title, text: t.different.c1, img: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
+                { title: t.different.c2Title, text: t.different.c2, img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
+                { title: t.different.c3Title, text: t.different.c3, img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
+                { title: t.different.c4Title, text: t.different.c4, img: 'https://images.unsplash.com/photo-1563986768609-322da13575f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
               ].map((card, i) => (
                 <motion.div
                   key={i}
@@ -351,13 +311,12 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -8, scale: 1.02 }}
-                  className="group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-shadow duration-500"
+                  className="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-shadow duration-500"
                 >
                   <div className="h-32 overflow-hidden">
                     <img src={card.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
                   </div>
                   <div className="p-6">
-                    <span className="text-gold text-xl mb-3 block">{card.icon}</span>
                     <h3 className="text-gold text-lg font-semibold mb-3">{card.title}</h3>
                     <p className="text-gray-600 leading-relaxed text-sm">{card.text}</p>
                   </div>
@@ -369,8 +328,8 @@ export default function Home() {
       </section>
 
       {/* ═══ Skills & Services ═══ */}
-      <section ref={el => { sectionRefs.current['services'] = el }} className="h-screen bg-gray-50 relative overflow-hidden">
-        <ParticlesBackground />
+      <section ref={el => { sectionRefs.current['services'] = el }} className="h-screen bg-white bg-mesh relative overflow-hidden">
+        <BgOrbs />
         <div className="h-full flex flex-col relative z-10">
           <div className="pt-24 pb-8 text-center">
             <motion.h2
@@ -408,7 +367,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -10 }}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-all duration-500 border border-gray-100"
+                  className="group bg-gray-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-all duration-500 border border-gray-100"
                 >
                   <div className="h-28 overflow-hidden">
                     <img src={s.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
@@ -426,8 +385,9 @@ export default function Home() {
       </section>
 
       {/* ═══ Projects ═══ */}
-      <section ref={el => { sectionRefs.current['projects'] = el }} className="h-screen bg-white relative overflow-hidden">
-        <div className="h-full flex flex-col">
+      <section ref={el => { sectionRefs.current['projects'] = el }} className="h-screen bg-gray-50 bg-waves relative overflow-hidden">
+        <BgOrbs />
+        <div className="h-full flex flex-col relative z-10">
           <div className="pt-24 pb-8 text-center">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
@@ -445,27 +405,12 @@ export default function Home() {
               transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="h-px bg-gradient-to-r from-transparent via-gold to-transparent w-32 mx-auto mt-6"
             />
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5 }}
-              className="text-gray-500 mt-4 max-w-xl mx-auto"
-            >
-              {t.projects.subtitle}
-            </motion.p>
+            <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.5 }} className="text-gray-500 mt-4 max-w-xl mx-auto">{t.projects.subtitle}</motion.p>
           </div>
 
           <div className="flex-1 flex flex-col justify-center px-8 pb-12">
             <div className="max-w-4xl mx-auto w-full">
-              {/* Counters */}
-              <motion.div
-                className="grid grid-cols-2 gap-12 mb-16"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.2 } } }}
-              >
+              <motion.div className="grid grid-cols-2 gap-12 mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.2 } } }}>
                 <motion.div variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } } }}>
                   <AnimatedCounter target={80} label={t.projects.yachts} />
                 </motion.div>
@@ -474,7 +419,6 @@ export default function Home() {
                 </motion.div>
               </motion.div>
 
-              {/* Project preview images */}
               <motion.div
                 className="grid grid-cols-3 gap-4 mb-12"
                 initial="hidden"
@@ -487,27 +431,14 @@ export default function Home() {
                   'https://images.unsplash.com/photo-1758448755952-42b404bc6f39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
                   'https://images.unsplash.com/photo-1642976975710-1d8890dbf5ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
                 ].map((src, i) => (
-                  <motion.div
-                    key={i}
-                    variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } } }}
-                    className="rounded-xl overflow-hidden shadow-lg h-32 md:h-40 group"
-                  >
+                  <motion.div key={i} variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } } }} className="rounded-xl overflow-hidden shadow-lg h-32 md:h-40 group">
                     <img src={src} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
                   </motion.div>
                 ))}
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="text-center"
-              >
-                <Link
-                  to="/projects"
-                  className="inline-flex items-center gap-3 border-2 border-gold text-gold px-10 py-4 text-sm tracking-[0.2em] uppercase hover:bg-gold hover:text-white transition-all duration-500 group rounded-full"
-                >
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.5 }} className="text-center">
+                <Link to="/projects" className="inline-flex items-center gap-3 border-2 border-gold text-gold px-10 py-4 text-sm tracking-[0.2em] uppercase hover:bg-gold hover:text-white transition-all duration-500 group rounded-full">
                   {t.nav.projects}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
                 </Link>
@@ -518,8 +449,9 @@ export default function Home() {
       </section>
 
       {/* ═══ References ═══ */}
-      <section ref={el => { sectionRefs.current['references'] = el }} className="h-screen bg-gray-50 relative overflow-hidden">
-        <div className="h-full flex flex-col">
+      <section ref={el => { sectionRefs.current['references'] = el }} className="h-screen bg-white bg-mesh relative overflow-hidden">
+        <BgOrbs />
+        <div className="h-full flex flex-col relative z-10">
           <div className="pt-24 pb-8 text-center">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
@@ -555,7 +487,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -6 }}
-                  className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:shadow-gold/5 transition-all duration-500"
+                  className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:shadow-gold/5 transition-all duration-500"
                 >
                   <div className="flex items-start gap-4 mb-4">
                     <img src={r.img} alt={r.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-gold/20" />
@@ -576,6 +508,8 @@ export default function Home() {
       <footer id="contact" ref={el => { sectionRefs.current['contact'] = el }} className="h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#111] to-[#0a0a0a]" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+        <div className="orb orb-1" style={{ opacity: 0.3 }} />
+        <div className="orb orb-3" style={{ opacity: 0.2 }} />
 
         <div className="h-full flex flex-col justify-center relative z-10 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto w-full">
@@ -588,9 +522,7 @@ export default function Home() {
             >
               <div>
                 <h4 className="text-xl mb-6 font-semibold tracking-wider font-[var(--font-display)] text-gold">YACHT AUDIO LTD</h4>
-                <p className="text-gray-400 leading-relaxed text-sm">
-                  Oberlandstr. 13-14<br />12099 Berlin<br />Germany
-                </p>
+                <p className="text-gray-400 leading-relaxed text-sm">Oberlandstr. 13-14<br />12099 Berlin<br />Germany</p>
               </div>
               <div>
                 <h5 className="mb-6 font-semibold text-sm tracking-[0.2em] uppercase text-gold">{t.footer.contact}</h5>
@@ -609,14 +541,7 @@ export default function Home() {
                 </ul>
               </div>
             </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="border-t border-gray-800 pt-8 text-center"
-            >
+            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="border-t border-gray-800 pt-8 text-center">
               <p className="text-gray-500 text-sm">© 2026 YACHT AUDIO LTD. {t.footer.rights}.</p>
             </motion.div>
           </div>
