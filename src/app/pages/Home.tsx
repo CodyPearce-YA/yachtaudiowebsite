@@ -45,18 +45,6 @@ function AnimatedCounter({ target, label, suffix = '+' }: { target: number; labe
   )
 }
 
-/* ─── Background orbs ─── */
-function BgOrbs() {
-  return (
-    <>
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
-      <div className="orb orb-4" />
-    </>
-  )
-}
-
 /* ═══════════════════════════════════════════
    MAIN HOME COMPONENT
    ═══════════════════════════════════════════ */
@@ -150,9 +138,42 @@ export default function Home() {
     <div ref={containerRef} className="h-screen overflow-y-scroll" style={{ overscrollBehavior: 'none' }}>
       <SectionSidebar items={sidebarItems} progress={progress} onNavigate={scrollTo} />
 
+      {/* ═══ Fixed background layer ── spans entire page ── */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Marine gradient base */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#f8f6f3] via-white to-[#f5f3ef]" />
+        {/* Large floating orbs */}
+        <motion.div
+          className="absolute w-[600px] h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.12) 0%, transparent 70%)', top: '5%', right: '-10%' }}
+          animate={{ y: [0, -30, 0], x: [0, 15, 0], scale: [1, 1.05, 1] }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute w-[500px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(196,169,125,0.1) 0%, transparent 70%)', top: '30%', left: '-8%' }}
+          animate={{ y: [0, 25, 0], x: [0, -20, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute w-[700px] h-[700px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.08) 0%, transparent 70%)', bottom: '10%', right: '5%' }}
+          animate={{ y: [0, -40, 0], scale: [1, 1.08, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(139,112,64,0.09) 0%, transparent 70%)', top: '60%', left: '15%' }}
+          animate={{ y: [0, 35, 0], x: [0, 25, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#A2834E 1px, transparent 1px), linear-gradient(90deg, #A2834E 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+      </div>
+
       {/* ═══ Header ═══ */}
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-gold/10"
+        className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-2xl border-b border-gold/10"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -189,7 +210,7 @@ export default function Home() {
       </motion.header>
 
       {/* ═══ Hero ═══ */}
-      <section ref={el => { sectionRefs.current['home'] = el }} className="h-screen relative">
+      <section ref={el => { sectionRefs.current['home'] = el }} className="h-screen relative z-10">
         <HeroVideo />
         <motion.div
           className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30"
@@ -209,10 +230,9 @@ export default function Home() {
       </section>
 
       {/* ═══ Who We Are ═══ */}
-      <section ref={el => { sectionRefs.current['about'] = el }} className="h-screen bg-white bg-mesh bg-waves relative overflow-hidden">
-        <BgOrbs />
-        <div className="h-full flex flex-col relative z-10">
-          <div className="pt-24 pb-8 text-center">
+      <section ref={el => { sectionRefs.current['about'] = el }} className="h-screen relative z-10">
+        <div className="h-full flex flex-col">
+          <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -231,7 +251,7 @@ export default function Home() {
             />
           </div>
 
-          <div className="flex-1 flex flex-col justify-center px-8 pb-12 overflow-hidden">
+          <div className="flex-1 flex flex-col justify-center px-8 pb-12 overflow-hidden relative z-20">
             <div className="max-w-6xl mx-auto w-full">
               <motion.div
                 className="grid grid-cols-3 gap-4 mb-10"
@@ -274,10 +294,9 @@ export default function Home() {
       </section>
 
       {/* ═══ What Makes Us Different ═══ */}
-      <section ref={el => { sectionRefs.current['different'] = el }} className="h-screen bg-gray-50 bg-grid relative overflow-hidden">
-        <BgOrbs />
-        <div className="h-full flex flex-col relative z-10">
-          <div className="pt-24 pb-8 text-center">
+      <section ref={el => { sectionRefs.current['different'] = el }} className="h-screen relative z-10">
+        <div className="h-full flex flex-col">
+          <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -296,7 +315,7 @@ export default function Home() {
             />
           </div>
 
-          <div className="flex-1 flex items-center px-8 pb-12">
+          <div className="flex-1 flex items-center px-8 pb-12 relative z-20">
             <div className="max-w-5xl mx-auto w-full grid md:grid-cols-2 gap-6">
               {[
                 { title: t.different.c1Title, text: t.different.c1, img: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
@@ -311,7 +330,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -8, scale: 1.02 }}
-                  className="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-shadow duration-500"
+                  className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-shadow duration-500"
                 >
                   <div className="h-32 overflow-hidden">
                     <img src={card.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
@@ -328,10 +347,9 @@ export default function Home() {
       </section>
 
       {/* ═══ Skills & Services ═══ */}
-      <section ref={el => { sectionRefs.current['services'] = el }} className="h-screen bg-white bg-mesh relative overflow-hidden">
-        <BgOrbs />
-        <div className="h-full flex flex-col relative z-10">
-          <div className="pt-24 pb-8 text-center">
+      <section ref={el => { sectionRefs.current['services'] = el }} className="h-screen relative z-10">
+        <div className="h-full flex flex-col">
+          <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -350,7 +368,7 @@ export default function Home() {
             />
           </div>
 
-          <div className="flex-1 flex items-center px-8 pb-12">
+          <div className="flex-1 flex items-center px-8 pb-12 relative z-20">
             <div className="max-w-5xl mx-auto w-full grid md:grid-cols-3 gap-6">
               {[
                 { title: t.services.video, text: t.services.videoText, num: '01', img: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400' },
@@ -367,7 +385,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -10 }}
-                  className="group bg-gray-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-all duration-500 border border-gray-100"
+                  className="group bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gold/10 transition-all duration-500 border border-gray-100"
                 >
                   <div className="h-28 overflow-hidden">
                     <img src={s.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
@@ -385,10 +403,9 @@ export default function Home() {
       </section>
 
       {/* ═══ Projects ═══ */}
-      <section ref={el => { sectionRefs.current['projects'] = el }} className="h-screen bg-gray-50 bg-waves relative overflow-hidden">
-        <BgOrbs />
-        <div className="h-full flex flex-col relative z-10">
-          <div className="pt-24 pb-8 text-center">
+      <section ref={el => { sectionRefs.current['projects'] = el }} className="h-screen relative z-10">
+        <div className="h-full flex flex-col">
+          <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -408,7 +425,7 @@ export default function Home() {
             <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.5 }} className="text-gray-500 mt-4 max-w-xl mx-auto">{t.projects.subtitle}</motion.p>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center px-8 pb-12">
+          <div className="flex-1 flex flex-col justify-center px-8 pb-12 relative z-20">
             <div className="max-w-4xl mx-auto w-full">
               <motion.div className="grid grid-cols-2 gap-12 mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.2 } } }}>
                 <motion.div variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } } }}>
@@ -449,10 +466,9 @@ export default function Home() {
       </section>
 
       {/* ═══ References ═══ */}
-      <section ref={el => { sectionRefs.current['references'] = el }} className="h-screen bg-white bg-mesh relative overflow-hidden">
-        <BgOrbs />
-        <div className="h-full flex flex-col relative z-10">
-          <div className="pt-24 pb-8 text-center">
+      <section ref={el => { sectionRefs.current['references'] = el }} className="h-screen relative z-10">
+        <div className="h-full flex flex-col">
+          <div className="pt-24 pb-8 text-center relative z-20">
             <motion.h2
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -472,7 +488,7 @@ export default function Home() {
             <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.5 }} className="text-gray-500 mt-4">{t.references.subtitle}</motion.p>
           </div>
 
-          <div className="flex-1 flex items-center px-8 pb-12">
+          <div className="flex-1 flex items-center px-8 pb-12 relative z-20">
             <div className="max-w-4xl mx-auto w-full grid md:grid-cols-2 gap-6">
               {[
                 { quote: t.references.t1, name: t.references.t1Name, role: t.references.t1Role, img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200' },
@@ -487,7 +503,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -6 }}
-                  className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:shadow-gold/5 transition-all duration-500"
+                  className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:shadow-gold/5 transition-all duration-500"
                 >
                   <div className="flex items-start gap-4 mb-4">
                     <img src={r.img} alt={r.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-gold/20" />
@@ -505,13 +521,24 @@ export default function Home() {
       </section>
 
       {/* ═══ Contact / Footer ═══ */}
-      <footer id="contact" ref={el => { sectionRefs.current['contact'] = el }} className="h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
+      <footer id="contact" ref={el => { sectionRefs.current['contact'] = el }} className="h-screen bg-[#0a0a0a] text-white relative z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#111] to-[#0a0a0a]" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
-        <div className="orb orb-1" style={{ opacity: 0.3 }} />
-        <div className="orb orb-3" style={{ opacity: 0.2 }} />
+        {/* Footer orbs */}
+        <motion.div
+          className="absolute w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(162,131,78,0.08) 0%, transparent 70%)', top: '10%', right: '-5%' }}
+          animate={{ y: [0, -20, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute w-[400px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(196,169,125,0.06) 0%, transparent 70%)', bottom: '20%', left: '-3%' }}
+          animate={{ y: [0, 25, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        />
 
-        <div className="h-full flex flex-col justify-center relative z-10 px-4 sm:px-6 lg:px-8">
+        <div className="h-full flex flex-col justify-center relative z-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto w-full">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
